@@ -19,5 +19,5 @@ Imagem Docker corporativa para troubleshooting de infraestrutura, rede, banco e 
 docker build -t troubleshooting:latest .
 
 ## Execução
-````
+```bash
 docker run -it troubleshooting:latest
