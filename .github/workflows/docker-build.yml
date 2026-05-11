@@ -14,23 +14,20 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login to GHCR
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image
+      - name: Build and push image
+        env:
+          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/troubleshooting:latest .
-
-      - name: Push image
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/troubleshooting:latest
+          docker build -t "${DH_USER}/${IMAGE_NAME}:latest" .
+          docker push "${DH_USER}/${IMAGE_NAME}:latest"
