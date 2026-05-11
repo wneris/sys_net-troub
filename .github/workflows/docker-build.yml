@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    tags:
+      # Ex.: 2.0.0 ou v2.0.0 (validação semver no script)
+      - '*.*.*'
 
 env:
   IMAGE_NAME: troubleshoot
@@ -15,6 +18,9 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,9 +31,31 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image
-        env:
-          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+      - name: Build and push
         run: |
-          docker build -t "${DH_USER}/${IMAGE_NAME}:latest" .
-          docker push "${DH_USER}/${IMAGE_NAME}:latest"
+          set -euo pipefail
+          IMAGE="${DH_USER}/${IMAGE_NAME}"
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#[vV]}"
+            if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Tag inválida '${TAG_NAME}'. Use MAJOR.MINOR.PATCH (ex.: 2.0.0 ou v2.0.0)."
+              exit 1
+            fi
+            IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
+            FULL="${MAJOR}.${MINOR}.${PATCH}"
+
+            docker build -t "${IMAGE}:${FULL}" .
+            docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}.${MINOR}"
+            docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}"
+            docker tag "${IMAGE}:${FULL}" "${IMAGE}:latest"
+
+            docker push "${IMAGE}:${FULL}"
+            docker push "${IMAGE}:${MAJOR}.${MINOR}"
+            docker push "${IMAGE}:${MAJOR}"
+            docker push "${IMAGE}:latest"
+          else
+            docker build -t "${IMAGE}:latest" .
+            docker push "${IMAGE}:latest"
+          fi
