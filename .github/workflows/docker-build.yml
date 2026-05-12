@@ -1,12 +1,19 @@
 name: Docker Build and Publish
 
+# Dispara só em merge/push na main.
+# Versão das tags da imagem: variável de repositório TAG_VERSION (Settings → Secrets and variables → Actions → Variables).
+# GitHub só permite letras, números e _ no nome — use TAG_VERSION (não "tag-version").
+# Valor esperado: MAJOR.MINOR.PATCH (ex.: 2.0.3). Publica :2.0.3, :2.0, :2 e :latest.
 on:
   push:
     branches:
       - main
-    tags:
-      # Ex.: 2.0.0 ou v2.0.0 (validação semver no script)
-      - '*.*.*'
+    # Alterações só nestes paths não disparam build (docs / ignore / CI deste workflow)
+    paths-ignore:
+      - '.github/workflows/docker-build.yml'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'README.md'
 
 env:
   IMAGE_NAME: troubleshoot
@@ -20,6 +27,7 @@ jobs:
 
     env:
       DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+      TAG_VERSION: ${{ vars.TAG_VERSION }}
 
     steps:
       - name: Checkout
@@ -36,26 +44,25 @@ jobs:
           set -euo pipefail
           IMAGE="${DH_USER}/${IMAGE_NAME}"
 
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAG_NAME="${GITHUB_REF#refs/tags/}"
-            VERSION="${TAG_NAME#[vV]}"
-            if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "::error::Tag inválida '${TAG_NAME}'. Use MAJOR.MINOR.PATCH (ex.: 2.0.0 ou v2.0.0)."
-              exit 1
-            fi
-            IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
-            FULL="${MAJOR}.${MINOR}.${PATCH}"
-
-            docker build -t "${IMAGE}:${FULL}" .
-            docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}.${MINOR}"
-            docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}"
-            docker tag "${IMAGE}:${FULL}" "${IMAGE}:latest"
-
-            docker push "${IMAGE}:${FULL}"
-            docker push "${IMAGE}:${MAJOR}.${MINOR}"
-            docker push "${IMAGE}:${MAJOR}"
-            docker push "${IMAGE}:latest"
-          else
-            docker build -t "${IMAGE}:latest" .
-            docker push "${IMAGE}:latest"
+          VERSION="$(echo -n "${TAG_VERSION}" | tr -d '[:space:]')"
+          VERSION="${VERSION#[vV]}"
+          if [[ -z "${VERSION}" ]]; then
+            echo "::error::Defina a variável de repositório TAG_VERSION (ex.: 2.0.3) em Settings → Secrets and variables → Actions → Variables."
+            exit 1
           fi
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::TAG_VERSION inválida '${TAG_VERSION}'. Use MAJOR.MINOR.PATCH (ex.: 2.0.3)."
+            exit 1
+          fi
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
+          FULL="${MAJOR}.${MINOR}.${PATCH}"
+
+          docker build -t "${IMAGE}:${FULL}" .
+          docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}.${MINOR}"
+          docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}"
+          docker tag "${IMAGE}:${FULL}" "${IMAGE}:latest"
+
+          docker push "${IMAGE}:${FULL}"
+          docker push "${IMAGE}:${MAJOR}.${MINOR}"
+          docker push "${IMAGE}:${MAJOR}"
+          docker push "${IMAGE}:latest"
