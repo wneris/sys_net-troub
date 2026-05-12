@@ -1,4 +1,4 @@
-FROM alpine:3.22
+FROM alpine:3.22.4
 
 # edge/testing: hping3
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
