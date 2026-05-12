@@ -19,8 +19,8 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
         tcpdump \
         tar \
         unzip \
-        vim \  
-        wget \ 
+        vim \
+        wget \
         aws-cli
 COPY flex.tar.gz /opt/
 RUN tar -xzf /opt/flex.tar.gz -C /opt && rm -f /opt/flex.tar.gz
