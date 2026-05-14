@@ -1,16 +1,17 @@
 name: Docker Build and Publish
 
-# Dispara só em merge/push na main.
+# Só em merge/push na branch main.
 # Versão das tags da imagem: variável de repositório TAG_VERSION (Settings → Secrets and variables → Actions → Variables).
-# GitHub só permite letras, números e _ no nome — use TAG_VERSION (não "tag-version").
+# O GitHub só aceita letras, números e _ no nome da variável — use TAG_VERSION (não "tag-version").
 # Valor esperado: MAJOR.MINOR.PATCH (ex.: 2.0.3). Publica :2.0.3, :2.0, :2 e :latest.
 on:
   push:
     branches:
       - main
-    # Alterações só nestes paths não disparam build (docs / ignore / CI deste workflow)
+    # Mudanças somente nestes caminhos não acionam o build (docs / ignore / CI)
     paths-ignore:
       - '.github/workflows/docker-build.yml'
+      - '.github/workflows/lint.yml'
       - '.gitignore'
       - '.dockerignore'
       - 'README.md'
@@ -59,7 +60,7 @@ jobs:
 
           echo "Verificando se a tag patch :${FULL} ainda não existe no registry..."
           if docker manifest inspect "${IMAGE}:${FULL}" >/dev/null 2>&1; then
-            echo "::error::A tag '${FULL}' já existe em ${IMAGE}. Incremente o PATCH em TAG_VERSION (ex.: nova versão patch) para publicar de novo; as tags :${MAJOR}, :${MAJOR}.${MINOR} e :latest são atualizadas a cada release bem sucedida."
+            echo "::error::A tag '${FULL}' já existe em ${IMAGE}. Incremente o PATCH em TAG_VERSION (ex.: nova versão de patch) para publicar de novo; as tags :${MAJOR}, :${MAJOR}.${MINOR} e :latest são atualizadas a cada release bem-sucedida."
             exit 1
           fi
 
