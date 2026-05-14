@@ -1,4 +1,4 @@
-FROM alpine:3.22.4
+FROM alpine:3.23.4
 
 COPY apk-packages.txt /tmp/apk-packages.txt
 
