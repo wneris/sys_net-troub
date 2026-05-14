@@ -19,3 +19,4 @@ unzip
 vim
 wget
 aws-cli
+jq
