@@ -8,19 +8,15 @@ COPY apk-packages.txt /tmp/apk-packages.txt
 # hadolint ignore=DL3018
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
     && apk upgrade --no-cache \
-    && apk add --no-cache \
-        $(grep -v '^\s*#' /tmp/apk-packages.txt | grep -v '^\s*$' | tr '\n' ' ')
+    && awk '!/^\s*$/ && !/^\s*#/' /tmp/apk-packages.txt > /tmp/pkgs.txt \
+    && xargs apk add --no-cache </tmp/pkgs.txt \
+    && rm -f /tmp/pkgs.txt
 
 ADD flex.tar.gz /opt/
 RUN mkdir -p /opt/flex \
-    && { \
-      echo "# Pacotes pedidos (apk-packages.txt) — $(date -u +%Y-%m-%dT%H:%MZ) UTC"; \
-      grep -v '^\s*#' /tmp/apk-packages.txt | grep -v '^\s*$' | sort -u; \
-      echo ""; \
-      echo "# Todos os pacotes instalados na imagem (apk list --installed) —"; \
-      apk list --installed | sort -u; \
-    } > /opt/flex/install.txt \
-    && rm -f /tmp/apk-packages.txt
+    && awk '!/^\s*$/ && !/^\s*#/' /tmp/apk-packages.txt > /tmp/install-raw.txt \
+    && sort -u /tmp/install-raw.txt -o /opt/flex/install.txt \
+    && rm -f /tmp/apk-packages.txt /tmp/install-raw.txt
 
 COPY inittab /etc/inittab
 RUN chmod 644 /etc/inittab && touch /sbin/openrc && chmod +x /sbin/openrc
