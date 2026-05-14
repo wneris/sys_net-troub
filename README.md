@@ -10,7 +10,7 @@ Os nomes dos pacotes **Alpine (`apk`)** ficam em **`apk-packages.txt`** (um por 
 
 Resumo do que costuma estar na lista: rede/diagnóstico (`nmap`, `tcpdump`, `hping3`, …), clientes de banco (`mariadb-client`, `postgresql-client`), cliente SSH, JRE 8, `vim`, `wget`, `aws-cli`, etc. — veja o arquivo na raiz do repositório.
 
-O build espera o arquivo `flex.tar.gz` na raiz do repositório (conteúdo extraído para `/opt/`). O arquivo **`/opt/flex/install.txt`** é gerado no build com: (1) a lista pedida em `apk-packages.txt` e (2) a saída de `apk list --installed` (tudo que ficou na imagem).
+O build espera o arquivo `flex.tar.gz` na raiz do repositório (conteúdo extraído para `/opt/`). O arquivo **`/opt/flex/install.txt`** é gerado no build com **somente** os nomes dos pacotes vindos de `apk-packages.txt` (comentários e linhas vazias removidos, ordenados), ou seja, o que o `apk add` instalou a partir dessa lista.
 
 ## Imagem publicada (Docker Hub)
 
