@@ -1,0 +1,6 @@
+# Binário baixado pelo script do actionlint (lint local / CI)
+/actionlint
+
+*.log
+*.tmp
+.DS_Store
