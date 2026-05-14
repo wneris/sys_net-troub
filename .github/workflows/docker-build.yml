@@ -57,6 +57,12 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
           FULL="${MAJOR}.${MINOR}.${PATCH}"
 
+          echo "Verificando se a tag patch :${FULL} ainda não existe no registry..."
+          if docker manifest inspect "${IMAGE}:${FULL}" >/dev/null 2>&1; then
+            echo "::error::A tag '${FULL}' já existe em ${IMAGE}. Incremente o PATCH em TAG_VERSION (ex.: nova versão patch) para publicar de novo; as tags :${MAJOR}, :${MAJOR}.${MINOR} e :latest são atualizadas a cada release bem sucedida."
+            exit 1
+          fi
+
           docker build -t "${IMAGE}:${FULL}" .
           docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}.${MINOR}"
           docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}"

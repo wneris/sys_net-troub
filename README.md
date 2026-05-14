@@ -35,7 +35,21 @@ Em cada push bem sucedido na `main`, a pipeline publica:
 | major | `2` |
 | última build desta configuração | `latest` |
 
-Atualize `TAG_VERSION` no GitHub **antes** (ou no fluxo combinado pelo time) do merge que deve publicar essa versão. Dois merges sem alterar `TAG_VERSION` voltam a publicar as mesmas tags no Hub.
+Atualize `TAG_VERSION` no GitHub **antes** (ou no fluxo combinado pelo time) do merge que deve publicar essa versão.
+
+### Imutabilidade da tag **patch** (CI)
+
+Antes do build, a pipeline confere se a tag **full** (`MAJOR.MINOR.PATCH`, a mesma que vem de `TAG_VERSION`) **já existe** no Docker Hub (`docker manifest inspect`). Se existir, o job **falha** — evita sobrescrever uma versão patch já publicada por engano.
+
+As tags **`:2`**, **`:2.0`** e **`:latest`** continuam a ser **atualizadas** em cada release; só o número **patch completo** é tratado como imutável neste fluxo.
+
+### Versões para testes / uso informal
+
+Para validar imagens sem consumir uma nova patch oficial, pode usar no pull as tags **móveis** que a pipeline mantém, por exemplo:
+
+`docker pull SEU_USUARIO/troubleshoot:2` · `SEU_USUARIO/troubleshoot:2.0` · `SEU_USUARIO/troubleshoot:latest` · ou outra linha já publicada (ex.: `:3`, `:3.1`).
+
+Para **publicar** uma nova imagem com política de patch imutável, incremente sempre `TAG_VERSION` (ex.: `2.0.3` → `2.0.4`). Valores de teste “soltos” no registry podem usar um espaço de versão reservado (ex.: `9.9.1`, `9.9.2`) se o time combinar esse uso.
 
 ### Secrets necessários (Actions)
 
