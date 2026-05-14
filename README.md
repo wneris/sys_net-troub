@@ -35,6 +35,42 @@ Em cada push **bem-sucedido** na `main`, a pipeline publica:
 
 Atualize `TAG_VERSION` no GitHub **antes** (ou conforme o fluxo combinado com a equipe) do merge que deve publicar essa versão.
 
+### Estratégia de tags (semver)
+
+Use esta convenção para decidir como incrementar `TAG_VERSION` (`MAJOR.MINOR.PATCH`).
+
+#### PATCH (último número, ex.: `2.0.3` → `2.0.4`)
+
+Incremente o patch para mudanças pequenas e compatíveis, por exemplo:
+
+- correção de bug (**bugfix**);
+- ajustes de **segurança**;
+- **atualização compatível** (dependências ou pacotes sem mudar contrato de uso);
+- **ajuste interno** (CI, documentação que não muda a imagem, pequenos fixes);
+- **refatoração** (**refactor**) que preserve o mesmo comportamento observável.
+
+#### MINOR (ex.: `2.0.4` → `2.1.0`)
+
+Incremente o **minor** e zere o **patch** quando houver:
+
+- **novas ferramentas** (novos pacotes em `apk-packages.txt` ou equivalente);
+- **novos scripts** ou automações relevantes na imagem;
+- **novos recursos** visíveis para quem usa o container;
+- **novas integrações** (ex.: novo cliente de serviço, nova stack auxiliar).
+
+#### MAJOR (ex.: `2.4.1` → `3.0.0`)
+
+Incremente o **major** e zere **minor** e **patch** quando houver **incompatibilidade** ou mudança estrutural forte, por exemplo:
+
+- **troca da distro base** (outra imagem `FROM` ou versão Alpine que mude o ecossistema);
+- **quebra de shell script** ou contratos assumidos por quem monta o container;
+- **remoção de binários** ou pacotes que antes existiam por padrão;
+- **alteração de paths** canônicos (`/opt/flex`, layouts esperados, etc.);
+- **alteração do `ENTRYPOINT` / `CMD`** com semântica diferente;
+- qualquer mudança que exija **adaptação** de quem consome a imagem (documentar no PR/release).
+
+> **Nota:** A pipeline publica tags `MAJOR`, `MAJOR.MINOR` e `PATCH` no Hub; quem só fixa a tag **patch** completa continua com imagem imutável por versão, conforme a verificação no CI.
+
 ### Imutabilidade da tag **patch** (CI)
 
 Antes do build, a pipeline verifica se a tag **completa** (`MAJOR.MINOR.PATCH`, a mesma de `TAG_VERSION`) **já existe** no Docker Hub (`docker manifest inspect`). Se existir, o job **falha** — evita sobrescrever por engano uma versão patch já publicada.
