@@ -1,0 +1,21 @@
+# Um pacote por linha. Linhas vazias e comentários (#) são ignoradas.
+# Edite este arquivo para adicionar ou remover ferramentas; evite mudar o Dockerfile só por causa de pacotes.
+
+bash
+bind-tools
+busybox-extras
+curl
+hping3
+iputils
+mariadb-client
+net-snmp-tools
+nmap
+openjdk8-jre-base
+openssh-client-default
+postgresql-client
+tcpdump
+tar
+unzip
+vim
+wget
+aws-cli

@@ -6,13 +6,11 @@ Base: **Alpine** (`alpine:3.22.4` no `Dockerfile`).
 
 ## Ferramentas embarcadas
 
-- Rede / diagnóstico: `nmap`, `tcpdump`, `hping3`, `iputils`, `bind-tools`, `busybox-extras`, `net-snmp-tools`, `curl`, `wget`
-- Clientes de banco: `mariadb-client`, `postgresql-client`
-- SSH: `openssh-client-default` (somente cliente)
-- Java: `openjdk8-jre-base` (JRE)
-- Outros: `bash`, `tar`, `unzip`, `vim`, `aws-cli`
+Os nomes dos pacotes **Alpine (`apk`)** ficam em **`apk-packages.txt`** (um por linha; linhas vazias e `#` comentário são ignoradas no build). Para incluir ou remover ferramentas, edite esse arquivo — o **`Dockerfile`** só precisa mudar quando alterar base, repositórios, arquivos copiados ou a lógica de build.
 
-O build espera o arquivo `flex.tar.gz` na raiz do repositório (conteúdo extraído para `/opt/`). Depois de instalar os pacotes extras, o arquivo `/opt/flex/install.txt` é criado como marcação.
+Resumo do que costuma estar na lista: rede/diagnóstico (`nmap`, `tcpdump`, `hping3`, …), clientes de banco (`mariadb-client`, `postgresql-client`), cliente SSH, JRE 8, `vim`, `wget`, `aws-cli`, etc. — veja o arquivo na raiz do repositório.
+
+O build espera o arquivo `flex.tar.gz` na raiz do repositório (conteúdo extraído para `/opt/`). O arquivo **`/opt/flex/install.txt`** é gerado no build com: (1) a lista pedida em `apk-packages.txt` e (2) a saída de `apk list --installed` (tudo que ficou na imagem).
 
 ## Imagem publicada (Docker Hub)
 
