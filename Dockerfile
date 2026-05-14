@@ -1,6 +1,8 @@
 FROM alpine:3.22.4
 
 # edge/testing: hping3
+# Pacotes apk sem versão fixa de propósito (imagem de diagnóstico; acompanha atualizações do Alpine).
+# hadolint ignore=DL3018
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
     && apk upgrade --no-cache \
     && apk add --no-cache \
@@ -22,8 +24,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
         vim \
         wget \
         aws-cli
-COPY flex.tar.gz /opt/
-RUN tar -xzf /opt/flex.tar.gz -C /opt && rm -f /opt/flex.tar.gz
+ADD flex.tar.gz /opt/
 RUN echo "tag version validate" > /opt/flex/install.txt
 
 COPY inittab /etc/inittab
