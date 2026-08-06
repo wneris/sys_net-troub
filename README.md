@@ -2,7 +2,7 @@
 
 Imagem Docker para troubleshooting de infraestrutura, rede, bancos e aplicações Java.
 
-Base: **Alpine** (`alpine:3.22.4` no `Dockerfile`).
+Base: **Alpine** (`alpine:3.24.1` no `Dockerfile`).
 
 ## Ferramentas embarcadas
 
