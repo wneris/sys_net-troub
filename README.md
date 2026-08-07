@@ -73,7 +73,7 @@ Incremente o **major** e zere **minor** e **patch** quando houver **incompatibil
 
 ### Imutabilidade da tag **patch** (CI)
 
-Antes do build, a pipeline verifica se a tag **completa** (`MAJOR.MINOR.PATCH`, a mesma de `TAG_VERSION`) **já existe** no Docker Hub (`docker manifest inspect`). Se existir, o job **falha** — evita sobrescrever por engano uma versão patch já publicada.
+Antes do build, a pipeline verifica se a tag **completa** (`MAJOR.MINOR.PATCH`, a mesma de `TAG_VERSION`) **já existe** no Docker Hub (`docker manifest inspect`). Se existir, o job **falha** — evita sobrescrever por engano uma versão patch já publicada. Se a verificação falhar por **rede/auth/erro inesperado** (e não for um “tag não encontrada” claro), o job **também falha**, para não tratar falha de consulta como “tag livre”.
 
 As tags **`:2`**, **`:2.0`** e **`:latest`** continuam sendo **atualizadas** a cada release; só o número **patch completo** é tratado como imutável neste fluxo.
 

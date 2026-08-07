@@ -60,10 +60,22 @@ jobs:
           FULL="${MAJOR}.${MINOR}.${PATCH}"
 
           echo "Verificando se a tag patch :${FULL} ainda não existe no registry..."
-          if docker manifest inspect "${IMAGE}:${FULL}" >/dev/null 2>&1; then
+          set +e
+          INSPECT_OUT="$(docker manifest inspect "${IMAGE}:${FULL}" 2>&1)"
+          INSPECT_RC=$?
+          set -e
+          if [[ "${INSPECT_RC}" -eq 0 ]]; then
             echo "::error::A tag '${FULL}' já existe em ${IMAGE}. Incremente o PATCH em TAG_VERSION (ex.: nova versão de patch) para publicar de novo; as tags :${MAJOR}, :${MAJOR}.${MINOR} e :latest são atualizadas a cada release bem-sucedida."
             exit 1
           fi
+          # Só segue se for claramente "não encontrado". Qualquer outro erro (rede, auth, etc.) falha o job
+          # — antes, falha do inspect era tratada como "tag livre" e podia sobrescrever a imagem.
+          if ! echo "${INSPECT_OUT}" | grep -qiE 'no such|not found|manifest unknown|does not exist|404|NAME_UNKNOWN|MANIFEST_UNKNOWN'; then
+            echo "::error::Não foi possível verificar se a tag '${FULL}' já existe (rc=${INSPECT_RC}). Abortando para não sobrescrever por engano."
+            echo "${INSPECT_OUT}"
+            exit 1
+          fi
+          echo "Tag :${FULL} não encontrada no registry — ok para publicar."
 
           docker build -t "${IMAGE}:${FULL}" .
           docker tag "${IMAGE}:${FULL}" "${IMAGE}:${MAJOR}.${MINOR}"
